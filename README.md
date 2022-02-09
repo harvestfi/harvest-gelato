@@ -1,8 +1,11 @@
 # Hardhat Gelato Resolver
-1. setup `dev-keys.json`
 
-```
-## `dev-keys.json`
+This repo contains the smart contract resolvers for Gelato (https://www.gelato.network/) which enables harvest to trigger `doHardWorks` through a decentralized network.
+
+### Development
+
+Create and setup `./dev-keys.json`:
+
 ```
 {
   "alchemyKey": "<your key>"
@@ -11,7 +14,7 @@
 
 ### Permissions
 
-Controller has to whitelist the deployed Resolver as hardworker.
+Harvest Controller has to whitelist the deployed Resolver as hardworker.
 
 
 ### Tests

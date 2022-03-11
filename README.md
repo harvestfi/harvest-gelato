@@ -14,7 +14,8 @@ Create and setup `./dev-keys.json`:
 
 ### Permissions
 
-Harvest Controller has to whitelist the deployed Resolver as hardworker.
+- Harvest Controller has to whitelist the deployed Resolver as hardworker.
+- The deployed resolver has to whitelist the PokeMe.sol (https://docs.gelato.network/guides/what-tasks-can-be-automated).
 
 
 ### Tests

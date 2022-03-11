@@ -40,6 +40,7 @@ contract BaseUpgradeableResolver is Initializable, GovernableInit, BaseUpgradeab
     _setGreatDealRatio(_greatDealRatio);
     _setNextImplementationDelay(_implementationChangeDelay);
     _setPausedTriggering(false);
+    _setGasFeePremium(0);
   }
 
   /**

@@ -26,3 +26,34 @@ Create and setup `./dev-keys.json`:
 ```
 npx hardhat test test/resolver.js
 ```
+
+### Deployment
+
+To deploy the resolver to mainnet, extend your ./dev-keys.json with the private key you want to deploy from and the polygonScan
+or etherScan etc. api key to verify the contract code after deployment:
+
+```
+{
+  "alchemyKey": "<your key>",
+  "privateKey": "<your key>",
+  "polygonscanApiKey": "<your key>",
+}
+```
+
+You can then run
+
+```
+npx hardhat run scripts/deploy.js --network polygon_mainnet
+```
+
+which will print the deployed contract addresses.
+
+To verify the contract code on the block explorers, run
+```
+npx hardhat verify <contract_address> --network polygon_mainnet
+```
+
+Note that to verify the resolver proxy you'll have to pass in the constructor arguments: 
+```
+npx hardhat verify <resolver_proxy_contract_address> --network polygon_mainnet "<resolver_implementation_contract_address>"
+```

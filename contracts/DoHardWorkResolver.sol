@@ -36,12 +36,11 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
     /**
     * Checks the profitability of a doHardWork by comparing gasCost
     * to profitSharing earnings times a greatDealRatio
-    * Called by Gelato as trigger for tasks (which trigger doHardWork on a given vault)
+    * Called by Gelato as trigger-check for tasks (trigger doHardWork on a given vault)
     */
     function checker(address vault)
         external
         override
-        onlyPokeMe
         onlyNotPausedTriggering
         returns (bool canExec, bytes memory execPayload)
     {

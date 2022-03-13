@@ -57,3 +57,6 @@ Note that to verify the resolver proxy you'll have to pass in the constructor ar
 ```
 npx hardhat verify <resolver_proxy_contract_address> --network polygon_mainnet "<resolver_implementation_contract_address>"
 ```
+
+##### Upgrade
+There is also a script to deploy the resolver only for an upgrade - see ./scripts/deploy-resolver-only.js and to schedule the upgrade, see ./scripts/schedule-upgrade.js.

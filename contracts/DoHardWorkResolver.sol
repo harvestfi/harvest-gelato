@@ -179,4 +179,8 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         // profitSharingGainsInRewardToken has 18 decimals, priceOneNativeInRewardToken has 18 decimals
         profitSharingGains = profitSharingGainsInRewardToken * 1e18 / priceOneNativeInRewardToken;
     }
+
+    function finalizeUpgrade() external onlyGovernance {
+        _finalizeUpgrade();
+    }
 }

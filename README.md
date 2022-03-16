@@ -27,6 +27,10 @@ Create and setup `./dev-keys.json`:
 npx hardhat test test/resolver.js
 ```
 
+```
+npx hardhat test test/deploy-upgrade.js
+```
+
 ### Deployment
 
 To deploy the resolver to mainnet, extend your ./dev-keys.json with the private key you want to deploy from and the polygonScan

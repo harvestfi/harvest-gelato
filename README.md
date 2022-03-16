@@ -31,6 +31,14 @@ npx hardhat test test/resolver.js
 npx hardhat test test/deploy-upgrade.js
 ```
 
+### Simulate checker
+
+You can simulate the checker result locally. Adjust the values in `./scripts/simulate-checker.js` and run it with:
+
+```
+npx hardhat run scripts/simulate-checker.js --network polygon_mainnet
+```
+
 ### Deployment
 
 To deploy the resolver to mainnet, extend your ./dev-keys.json with the private key you want to deploy from and the polygonScan

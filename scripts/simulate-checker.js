@@ -1,18 +1,18 @@
-const scheduleUpgrade = async () => {
-    // Todo: set the two values:
-    const newResolverAddress = "0x393D754f571121E0e0F5B156AAC7D4ffB347EEA2";
+const checker = async () => {
+    // Todo: set the resolver proxy address and vault to be checked:
     const resolverProxyAddress = "0xe6840d91b7A7F2d9cc6731067cEBea19d39Eac46";
+    const vault = "0xC2F50f1886D790e199Cd8a5c0AC360DF44636012";
 
-    // initialize resolver
+    // use ethers.js for callStatic
     const DoHardWorkResolverEthers = await ethers.getContractFactory("DoHardWorkResolver");
     const resolver = await DoHardWorkResolverEthers.attach(resolverProxyAddress);
 
-    await resolver.scheduleUpgrade(newResolverAddress);
+    const result = await resolver.callStatic.checker(vault);
 
-    console.log("resolver upgrade scheduled.");
+    console.log(result);
 }
   
-scheduleUpgrade()
+checker()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

@@ -31,12 +31,29 @@ npx hardhat test test/resolver.js
 npx hardhat test test/deploy-upgrade.js
 ```
 
-### Simulate checker
+### Simulations
 
-You can simulate the checker result locally. Adjust the values in `./scripts/simulate-checker.js` and run it with:
+You can simulate the checker and hardWork results locally. 
+
+Checker: Adjust the values in `./test/simulate-checker.js` and run it with:
 
 ```
-npx hardhat run scripts/simulate-checker.js --network polygon_mainnet
+npx hardhat run test/simulate-checker.js
+```
+
+doHardWork from resolver only: Adjust the values in `./test/simulate-hardwork-resolver.js` and run it with:
+
+```
+npx hardhat run test/simulate-hardwork-resolver.js
+```
+
+Gelato hardwork simulation does not work for some reason, needs to be fixed:
+> VM Exception while processing transaction: reverted with reason string 'Address: call to non-contract'
+
+doHardWork triggered from gelato Ops: Adjust the values in `./test/simulate-hardwork-gelato.js` and run it with:
+
+```
+npx hardhat run test/simulate-hardwork-gelato.js
 ```
 
 ### Deployment

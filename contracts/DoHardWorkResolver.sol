@@ -63,12 +63,11 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
     * Gelato nodes call back here so the Controller doesn't have to whitelist PokeMe.sol as a hardWorker
     * but rather just this resolver (which anyway has to be done to perform the check)
     */
-    function doHardWork(bytes calldata performData) 
+    function doHardWork(address vault) 
         external 
         onlyPokeMe
         onlyNotPausedTriggering
     {
-        (address vault) = abi.decode(performData, (address));
         IController(controller()).doHardWork(vault);
     }
 

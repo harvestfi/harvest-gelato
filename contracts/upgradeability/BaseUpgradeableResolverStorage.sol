@@ -11,6 +11,7 @@ contract BaseUpgradeableResolverStorage {
   bytes32 internal constant _PROFIT_SHARING_TOKEN_SLOT = 0x406c2950ca74957cee4ebed9a6daac5c5b97fceb405fa1eae4ebc01cbd61e099;
   bytes32 internal constant _CONTROLLER_SLOT = 0x70b3e8d18368bad384385907a3d89cfeecfe7c949e3ad705957a29512e260ec2;
   bytes32 internal constant _POKE_ME_SLOT = 0xc8e8ea5944ac445d6a6d8a4f7bcdd582856398bbc65a75356981628f30c6324d;
+  bytes32 internal constant _GAS_FEE_PREMIUM_SLOT = 0xefe8fc35a91b0afe7baad82b4baf0c7e1279ea58ed2599ac12fe856e41826a2f;
 
   bytes32 internal constant _NEXT_IMPLEMENTATION_SLOT = 0xcfe905b661403e0f26512769ffd220899a7e83e70902b0e494ce2c2d8f6a6563;
   bytes32 internal constant _NEXT_IMPLEMENTATION_TIMESTAMP_SLOT = 0x03ac3c2f69082456ae0db3f2a1e5928d18e44938556e9d71462c4b83c57356c4;
@@ -24,6 +25,7 @@ contract BaseUpgradeableResolverStorage {
     assert(_PROFIT_SHARING_TOKEN_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.profitSharingToken")) - 1));
     assert(_CONTROLLER_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.controller")) - 1));
     assert(_POKE_ME_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.pokeMe")) - 1));
+    assert(_GAS_FEE_PREMIUM_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.gasFeePremium")) - 1));
 
     assert(_NEXT_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.nextImplementation")) - 1));
     assert(_NEXT_IMPLEMENTATION_TIMESTAMP_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.nextImplementationTimestamp")) - 1));
@@ -76,6 +78,14 @@ contract BaseUpgradeableResolverStorage {
 
   function greatDealRatio() public view returns (uint256) {
     return getUint256(_GREAT_DEAL_RATIO_SLOT);
+  }
+
+  function _setGasFeePremium(uint256 _value) internal {
+    setUint256(_GAS_FEE_PREMIUM_SLOT, _value);
+  }
+
+  function gasFeePremium() public view returns (uint256) {
+    return getUint256(_GAS_FEE_PREMIUM_SLOT);
   }
 
   // a flag for disabling any triggers for emergencies

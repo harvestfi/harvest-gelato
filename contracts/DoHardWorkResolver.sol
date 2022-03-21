@@ -36,12 +36,11 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
     /**
     * Checks the profitability of a doHardWork by comparing gasCost
     * to profitSharing earnings times a greatDealRatio
-    * Called by Gelato as trigger for tasks (which trigger doHardWork on a given vault)
+    * Called by Gelato as trigger-check for tasks (trigger doHardWork on a given vault)
     */
     function checker(address vault)
         external
         override
-        onlyPokeMe
         onlyNotPausedTriggering
         returns (bool canExec, bytes memory execPayload)
     {
@@ -55,9 +54,30 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         }
 
         execPayload = abi.encodeWithSelector(
-            IController.doHardWork.selector,
+            DoHardWorkResolver.doHardWork.selector,
             vault
         );
+    }
+
+    /**
+    * Gelato nodes call back here so the Controller doesn't have to whitelist PokeMe.sol as a hardWorker
+    * but rather just this resolver (which anyway has to be done to perform the check)
+    */
+    function doHardWork(address vault) 
+        external 
+        onlyPokeMe
+        onlyNotPausedTriggering
+    {
+        IController(controller()).doHardWork(vault);
+    }
+
+    /**
+    * Sets the gas fee premium that Gelato charges on top of gas fee costs for execution of tasks
+    * this has to be included in cost vs profit calculation
+    * with added decimals (e.g. 20% -> 200; 100% -> 1000)
+    */
+    function setGasFeePremium(uint256 gasFeePremium) public onlyGovernance {
+        _setGasFeePremium(gasFeePremium);
     }
 
     /**
@@ -142,6 +162,8 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         // use amount of gas left after to get gas amount which the doHardWork used
         uint256 gasUsed = gasLeftBefore - gasleft();
         gasCost = gasUsed * tx.gasprice;
+        // add gas fee premium (with denominator of 1000 because 100% -> 1000)
+        gasCost = gasCost * gasFeePremium() / 1000 + gasCost;
 
         // approximate profit sharing gains
         // get farmBalance after
@@ -155,5 +177,9 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         // gas cost is already in native token, let's get the reward token to native token
         // profitSharingGainsInRewardToken has 18 decimals, priceOneNativeInRewardToken has 18 decimals
         profitSharingGains = profitSharingGainsInRewardToken * 1e18 / priceOneNativeInRewardToken;
+    }
+
+    function finalizeUpgrade() external onlyGovernance {
+        _finalizeUpgrade();
     }
 }

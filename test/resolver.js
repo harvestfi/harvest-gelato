@@ -73,7 +73,7 @@ describe("Harvest Gelato DoHardWorkResolver", () => {
     });
 
     const initializeResolver = async () => {
-        console.log("intiializing resolver")
+        console.log("initializing resolver")
         // deploy resolvers storage
         const storage = await Storage.new({from: governance});
 

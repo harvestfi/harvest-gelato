@@ -28,6 +28,7 @@ contract BaseUpgradeableResolver is Initializable, GovernableInit, BaseUpgradeab
     address _profitSharingTokenToNativePriceFeed,
     address _pokeMe,
     uint8 _greatDealRatio,
+    uint256 _maxIdleFraction,
     uint256 _implementationChangeDelay
   ) internal {
      GovernableInit.initialize(_storage);
@@ -39,6 +40,7 @@ contract BaseUpgradeableResolver is Initializable, GovernableInit, BaseUpgradeab
     _setProfitSharingTokenToNativePriceFeed(_profitSharingTokenToNativePriceFeed);
     _setGreatDealRatio(_greatDealRatio);
     _setNextImplementationDelay(_implementationChangeDelay);
+    _setMaxIdleFraction(_maxIdleFraction);
     _setPausedTriggering(false);
     _setGasFeePremium(0);
   }

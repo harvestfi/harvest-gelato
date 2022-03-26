@@ -7,9 +7,16 @@ const IController = artifacts.require("IController");
 
 // use block 23880727 as example for non-profitability
 // use block 24223199 as example for profitability
+// use block 26280966 as example for idleFraction trigger
+// use block 26282000 as example for non-idleFraction
 
 const nonProfitableBlockNumber = 23880727;
 const profitableBlockNumber = 24223199;
+const idleFractionTriggerBlockNumber = 26280966;
+const idleFractionNotTriggerBlockNumber = 26282000;
+
+const profitabilityVault = "0x13ef392208a9963527346A20873058E826d7f0B7";
+const idleFractionVault = "0x102Df50dB22407B64a8A6b11734c8743B6AeF953";
 
 // Vanilla Mocha test. Increased compatibility with tools that integrate Mocha.
 describe("Harvest Gelato DoHardWorkResolver", () => {
@@ -28,14 +35,15 @@ describe("Harvest Gelato DoHardWorkResolver", () => {
     let resolverImplementation;
 
     // the test behaves differently depending on the initial block number.
-    // it checks for correct should trigger if block is 24223199
-    // and it checks for correct non-trigger if block is 23880727
+    // it checks for correct should trigger or correct should not trigger depending on the initial block
     let initialBlockNumber;
 
     before(async () => {
         initialBlockNumber = await web3.eth.getBlockNumber();
-        if(initialBlockNumber !== profitableBlockNumber && initialBlockNumber !== nonProfitableBlockNumber){
-            console.warn("\n\n -------- \nNon supported block number test case! Please check profitability yourself!\n-------\n\n");
+        if(![profitableBlockNumber, nonProfitableBlockNumber, idleFractionNotTriggerBlockNumber, idleFractionTriggerBlockNumber]
+            .includes(initialBlockNumber)
+        ){
+            console.warn("\n\n -------- \nNon supported block number test case! Please check trigger yourself!\n-------\n\n");
         }
         
         accounts = await web3.eth.getAccounts();
@@ -50,22 +58,27 @@ describe("Harvest Gelato DoHardWorkResolver", () => {
         await controller.addHardWorker(resolver.address, {from: governance});
     });
 
-    it("should assess profitability correctly", async () => {
+    it("should trigger doHardWork correctly", async () => {
+        const vault = [profitableBlockNumber, nonProfitableBlockNumber].includes(initialBlockNumber) 
+                        ? profitabilityVault : idleFractionVault;
+
+        console.log("Running test for vault", vault, "at block number", initialBlockNumber);
+
         // use ethers.js because of support for callStatic
         // simulate with 30 GWEI gas price
         const result = await resolver.connect(governance).callStatic.checker(
-            "0x13ef392208a9963527346A20873058E826d7f0B7", 
+            vault, 
             {gasPrice: 30000000000}
         );
 
         console.log("\n\n----- Transaction result: -----\n", result);
 
-        if(initialBlockNumber === profitableBlockNumber) {
-            assert(result['canExec'] === true, "ERROR: Profitability not detected (when it should)!");
-            console.log("\n\nSuccess: Protifability detected correctly!");
-        } else if(initialBlockNumber === nonProfitableBlockNumber) {
-            assert(result['canExec'] === false, "ERROR: Non-Profitability not detected (when it should)!");
-            console.log("\n\nSuccess: Non-Protifability detected correctly!");
+        if (initialBlockNumber === profitableBlockNumber || initialBlockNumber === idleFractionTriggerBlockNumber){
+            assert(result['canExec'] === true, "ERROR: Trigger not detected (when it should)!");
+            console.log("\n\nSuccess: Trigger detected correctly!");
+        } else if(initialBlockNumber === nonProfitableBlockNumber || initialBlockNumber === idleFractionNotTriggerBlockNumber) {
+            assert(result['canExec'] === false, "ERROR: Non-Trigger not detected (when it should)!");
+            console.log("\n\nSuccess: Non-Trigger detected correctly!");
         } else {
             console.warn("\n\n -------- \nNon supported block number test case! Please check profitability yourself!\n-------\n\n");
             assert(true === false, "Not supported test case");

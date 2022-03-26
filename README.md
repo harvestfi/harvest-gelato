@@ -21,10 +21,9 @@ Create and setup `./dev-keys.json`:
 ### Tests
 
 doHardWork Trigger tests:
-- use block 23880727 as example for non-profitability
 - use block 24223199 as example for profitability
 - use block 26280966 as example for idleFraction trigger
-- use block 26282000 as example for non-idleFraction
+- use block 26282000 as example for no trigger tests
 
 ```
 npx hardhat test test/resolver.js

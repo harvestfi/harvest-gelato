@@ -12,6 +12,7 @@ contract BaseUpgradeableResolverStorage {
   bytes32 internal constant _CONTROLLER_SLOT = 0x70b3e8d18368bad384385907a3d89cfeecfe7c949e3ad705957a29512e260ec2;
   bytes32 internal constant _POKE_ME_SLOT = 0xc8e8ea5944ac445d6a6d8a4f7bcdd582856398bbc65a75356981628f30c6324d;
   bytes32 internal constant _GAS_FEE_PREMIUM_SLOT = 0xefe8fc35a91b0afe7baad82b4baf0c7e1279ea58ed2599ac12fe856e41826a2f;
+  bytes32 internal constant _MAX_IDLE_FRACTION_SLOT = 0xa4bf07778ed0f11bbf14f1fe680b39652ccdb81e7fcd41c3bfb820fcfa377fe1;
 
   bytes32 internal constant _NEXT_IMPLEMENTATION_SLOT = 0xcfe905b661403e0f26512769ffd220899a7e83e70902b0e494ce2c2d8f6a6563;
   bytes32 internal constant _NEXT_IMPLEMENTATION_TIMESTAMP_SLOT = 0x03ac3c2f69082456ae0db3f2a1e5928d18e44938556e9d71462c4b83c57356c4;
@@ -26,62 +27,71 @@ contract BaseUpgradeableResolverStorage {
     assert(_CONTROLLER_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.controller")) - 1));
     assert(_POKE_ME_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.pokeMe")) - 1));
     assert(_GAS_FEE_PREMIUM_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.gasFeePremium")) - 1));
+    assert(_MAX_IDLE_FRACTION_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.maxIdleFraction")) - 1));
 
     assert(_NEXT_IMPLEMENTATION_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.nextImplementation")) - 1));
     assert(_NEXT_IMPLEMENTATION_TIMESTAMP_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.nextImplementationTimestamp")) - 1));
     assert(_NEXT_IMPLEMENTATION_DELAY_SLOT == bytes32(uint256(keccak256("eip1967.resolverStorage.nextImplementationDelay")) - 1));
   }
 
-  function _setController(address _address) internal {
-    setAddress(_CONTROLLER_SLOT, _address);
+  function _setController(address value) internal {
+    setAddress(_CONTROLLER_SLOT, value);
   }
 
   function controller() public view returns (address) {
     return getAddress(_CONTROLLER_SLOT);
   }
 
-  function _setPokeMe(address _address) internal {
-    setAddress(_POKE_ME_SLOT, _address);
+  function _setPokeMe(address value) internal {
+    setAddress(_POKE_ME_SLOT, value);
   }
 
   function pokeMe() public view returns (address) {
     return getAddress(_POKE_ME_SLOT);
   }
 
-  function _setProfitSharingTokenToNativePriceFeed(address _address) internal {
-    setAddress(_PROFIT_SHARING_TOKEN_TO_NATIVE_PRICEFEED_SLOT, _address);
+  function _setMaxIdleFraction(uint256 value) internal {
+    setUint256(_MAX_IDLE_FRACTION_SLOT, value);
+  }
+
+  function maxIdleFraction() public view returns (uint256) {
+    return getUint256(_MAX_IDLE_FRACTION_SLOT);
+  }
+
+  function _setProfitSharingTokenToNativePriceFeed(address value) internal {
+    setAddress(_PROFIT_SHARING_TOKEN_TO_NATIVE_PRICEFEED_SLOT, value);
   }
 
   function profitSharingTokenToNativePriceFeed() public virtual view returns (address) {
     return getAddress(_PROFIT_SHARING_TOKEN_TO_NATIVE_PRICEFEED_SLOT);
   }
 
-  function _setProfitSharingTarget(address _address) internal {
-    setAddress(_PROFIT_SHARING_TARGET_SLOT, _address);
+  function _setProfitSharingTarget(address value) internal {
+    setAddress(_PROFIT_SHARING_TARGET_SLOT, value);
   }
 
   function profitSharingTarget() public view returns (address) {
     return getAddress(_PROFIT_SHARING_TARGET_SLOT);
   }
 
-  function _setProfitSharingToken(address _address) internal {
-    setAddress(_PROFIT_SHARING_TOKEN_SLOT, _address);
+  function _setProfitSharingToken(address value) internal {
+    setAddress(_PROFIT_SHARING_TOKEN_SLOT, value);
   }
 
   function profitSharingToken() public view returns (address) {
     return getAddress(_PROFIT_SHARING_TOKEN_SLOT);
   }
 
-  function _setGreatDealRatio(uint256 _value) internal {
-    setUint256(_GREAT_DEAL_RATIO_SLOT, _value);
+  function _setGreatDealRatio(uint256 value) internal {
+    setUint256(_GREAT_DEAL_RATIO_SLOT, value);
   }
 
   function greatDealRatio() public view returns (uint256) {
     return getUint256(_GREAT_DEAL_RATIO_SLOT);
   }
 
-  function _setGasFeePremium(uint256 _value) internal {
-    setUint256(_GAS_FEE_PREMIUM_SLOT, _value);
+  function _setGasFeePremium(uint256 value) internal {
+    setUint256(_GAS_FEE_PREMIUM_SLOT, value);
   }
 
   function gasFeePremium() public view returns (uint256) {
@@ -89,8 +99,8 @@ contract BaseUpgradeableResolverStorage {
   }
 
   // a flag for disabling any triggers for emergencies
-  function _setPausedTriggering(bool _value) internal {
-    setBoolean(_PAUSED_TRIGGERING_SLOT, _value);
+  function _setPausedTriggering(bool value) internal {
+    setBoolean(_PAUSED_TRIGGERING_SLOT, value);
   }
 
   function pausedTriggering() public view returns (bool) {
@@ -98,24 +108,24 @@ contract BaseUpgradeableResolverStorage {
   }
 
   // upgradeability
-  function _setNextImplementation(address _address) internal {
-    setAddress(_NEXT_IMPLEMENTATION_SLOT, _address);
+  function _setNextImplementation(address value) internal {
+    setAddress(_NEXT_IMPLEMENTATION_SLOT, value);
   }
 
   function nextImplementation() public view returns (address) {
     return getAddress(_NEXT_IMPLEMENTATION_SLOT);
   }
 
-  function _setNextImplementationTimestamp(uint256 _value) internal {
-    setUint256(_NEXT_IMPLEMENTATION_TIMESTAMP_SLOT, _value);
+  function _setNextImplementationTimestamp(uint256 value) internal {
+    setUint256(_NEXT_IMPLEMENTATION_TIMESTAMP_SLOT, value);
   }
 
   function nextImplementationTimestamp() public view returns (uint256) {
     return getUint256(_NEXT_IMPLEMENTATION_TIMESTAMP_SLOT);
   }
 
-  function _setNextImplementationDelay(uint256 _value) internal {
-    setUint256(_NEXT_IMPLEMENTATION_DELAY_SLOT, _value);
+  function _setNextImplementationDelay(uint256 value) internal {
+    setUint256(_NEXT_IMPLEMENTATION_DELAY_SLOT, value);
   }
 
   function nextImplementationDelay() public view returns (uint256) {
@@ -123,25 +133,25 @@ contract BaseUpgradeableResolverStorage {
   }
 
   // generic slots
-  function setBoolean(bytes32 slot, bool _value) internal {
-    setUint256(slot, _value ? 1 : 0);
+  function setBoolean(bytes32 slot, bool value) internal {
+    setUint256(slot, value ? 1 : 0);
   }
 
   function getBoolean(bytes32 slot) internal view returns (bool) {
     return (getUint256(slot) == 1);
   }
 
-  function setAddress(bytes32 slot, address _address) internal {
+  function setAddress(bytes32 slot, address value) internal {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      sstore(slot, _address)
+      sstore(slot, value)
     }
   }
 
-  function setUint256(bytes32 slot, uint256 _value) internal {
+  function setUint256(bytes32 slot, uint256 value) internal {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      sstore(slot, _value)
+      sstore(slot, value)
     }
   }
 

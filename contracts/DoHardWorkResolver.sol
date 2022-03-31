@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./interfaces/IResolver.sol";
 import "./interfaces/IController.sol";
+import "./interfaces/IVault.sol";
 import "./interfaces/AggregatorV3Interface.sol";
 import "./upgradeability/BaseUpgradeableResolver.sol";
 
@@ -29,6 +30,7 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
             _profitSharingTokenToNativePriceFeed,
             _pokeMe,
             6, // great deal ratio
+            20, // max idle fraction
             12 hours // implementation change delay
         );
     }
@@ -44,14 +46,10 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         onlyNotPausedTriggering
         returns (bool canExec, bytes memory execPayload)
     {
-       (uint256 profitSharingGains, uint256 gasCost) = checkDoHardWorkCostVsGain(vault);
-
-        // check profitability and return false if gains threshold is not surpassed
-        if(profitSharingGains > gasCost * greatDealRatio()) {
-            canExec = true;
-        } else {
-            canExec = false;
-        }
+        // order of execution matters. make sure checkDoHardWorkCostVsGain is listed last,
+        // otherwise a doHardWork will have been executed for the later tests which essentially
+        // renders all tests after checkDoHardWorkCostVsGain useless
+        canExec = checkMaxIdleFraction(vault) || checkDoHardWorkCostVsGain(vault);
 
         execPayload = abi.encodeWithSelector(
             DoHardWorkResolver.doHardWork.selector,
@@ -69,6 +67,14 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         onlyNotPausedTriggering
     {
         IController(controller()).doHardWork(vault);
+    }
+
+    /**
+    * Sets the max idle fraction that can sit around in the vault before triggering a
+    * doHardWork which invests the idle amount
+    */
+    function setMaxIdleFraction(uint256 maxIdleFraction) public onlyGovernance {
+        _setMaxIdleFraction(maxIdleFraction);
     }
 
     /**
@@ -124,7 +130,7 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
     }
 
     /**
-    * governance can pause all triggers in an emergency situation
+    * Governance can pause all triggers in an emergency situation
     */
     function setPausedTriggering(bool pausedTriggering) public onlyGovernance {
         _setPausedTriggering(pausedTriggering);
@@ -146,10 +152,12 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         return IERC20(profitSharingToken()).balanceOf(profitSharingTarget());
     }
 
-    /** 
-     * Executes a doHardWork on the given vault and returns profitSharingGains and gasCost
+    /**
+     * Checks the profitability of a doHardWork by executing it.
+     * If the doHardwork is profitable by at least greatDealRatio,
+     * then true is returned and this will trigger a doHardWork
      */
-    function checkDoHardWorkCostVsGain(address vault) internal returns(uint256 profitSharingGains, uint256 gasCost){
+    function checkDoHardWorkCostVsGain(address vault) internal returns(bool){
          // get farmBalance before
         uint256 profitSharingBalanceBefore = getProfitSharingTargetBalance();
         // get amount of gas left before
@@ -161,7 +169,7 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         // approximate tx cost
         // use amount of gas left after to get gas amount which the doHardWork used
         uint256 gasUsed = gasLeftBefore - gasleft();
-        gasCost = gasUsed * tx.gasprice;
+        uint256 gasCost = gasUsed * tx.gasprice;
         // add gas fee premium (with denominator of 1000 because 100% -> 1000)
         gasCost = gasCost * gasFeePremium() / 1000 + gasCost;
 
@@ -176,7 +184,20 @@ contract DoHardWorkResolver is Initializable, GovernableInit, BaseUpgradeableRes
         uint256 priceOneNativeInRewardToken = getLatestPrice();
         // gas cost is already in native token, let's get the reward token to native token
         // profitSharingGainsInRewardToken has 18 decimals, priceOneNativeInRewardToken has 18 decimals
-        profitSharingGains = profitSharingGainsInRewardToken * 1e18 / priceOneNativeInRewardToken;
+        uint256 profitSharingGains = profitSharingGainsInRewardToken * 1e18 / priceOneNativeInRewardToken;
+
+        return profitSharingGains > gasCost * greatDealRatio();
+    }
+
+    /**
+     * Checks if more than 1/maxIdleFraction of funds are sitting in the vault idle
+     * If so, then true is returned and this will trigger a doHardWork
+     */
+    function checkMaxIdleFraction(address vault) internal view returns(bool) {
+        uint256 availableToInvestOut = IVault(vault).availableToInvestOut();
+        uint256 underlyingBalanceWithInvestment = IVault(vault).underlyingBalanceWithInvestment();
+
+        return availableToInvestOut > underlyingBalanceWithInvestment * 1e18 / maxIdleFraction() / 1e18;
     }
 
     function finalizeUpgrade() external onlyGovernance {
